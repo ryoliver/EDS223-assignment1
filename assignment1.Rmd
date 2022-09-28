@@ -1,0 +1,112 @@
+---
+title: 'EDS 223: assignment 1'
+author: '{student name and collaborators}'
+date: "2022-09-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## introduction
+The following exercises are modified from [Chapter 9 of Geocomputation with R by Rovin Lovelace](https://geocompr.robinlovelace.net/adv-map.html). Each question lists the total number of points. The breakdown of points can be found at the end of each instruction in parentheses. A general grading rubric can be found on the [course website](https://ryoliver.github.io/EDS_223_spatial_analysis/assignments.html).
+
+**Please update "author" to list your first and last names and any collaborators (e.g. Ruth Oliver, Friend1, Friend2)**
+
+**Due by midnight Saturday 2022-10-08**
+
+## prerequisites
+
+```{r load, include=TRUE, message=FALSE, warning=FALSE}
+library(sf)
+library(raster)
+library(dplyr)
+library(spData)
+library(spDataLarge)
+library(tmap)
+```
+
+These exercises rely on a new data object based on the **world** and **worldbank_df** datasets from the **spData* package.
+
+```{r include=TRUE}
+africa = world |> 
+  filter(continent == "Africa", !is.na(iso_a2)) |> 
+  left_join(worldbank_df, by = "iso_a2") |> 
+  dplyr::select(name, subregion, gdpPercap, HDI, pop_growth) |> 
+  st_transform("+proj=aea +lat_1=20 +lat_2=-23 +lat_0=0 +lon_0=25")
+```
+
+We will also use the **zion** and **nlcd** datasets from the **spDataLarge** package.
+
+```{r include=TRUE}
+zion = st_read((system.file("vector/zion.gpkg", package = "spDataLarge")))
+data(nlcd, package = "spDataLarge")
+force(nlcd)
+```
+
+## question 1
+##### 10 points
+
+Create a map showing the geographic distribution of the Human Development Index (HDI) across Africa.  
+-   use both base graphics (hint: use **plot()**) and **tmap**) (4)   
+-   name two advantages of each based on the experience (3) 
+-   name three other mapping packages and an advantage of each (3)
+
+
+```{r include=TRUE}
+```
+
+## question 2
+##### 20 points
+
+Extend the **tmap** created for question 1 so the legend has three bins: "high" (HDI above 0.7), "medium" (HDI between 0.55 and 0.7), and "low" (HDI below 0.55). (5)  
+-   change the legend title (5)  
+-   change the class labels (5)  
+-   change the color palette (5)  
+
+```{r include=TRUE}
+```
+
+## question 3
+##### 20 points
+
+Represent Africa's subregions on the map. (5)    
+-   change the color palette (5)  
+-   change the legend title (5)  
+-   combine this map with the map from question 2 into a single plot (5)   
+
+```{r include=TRUE}
+```
+
+## question 4
+##### 30 points
+
+Create a land cover map of Zion National Park (5)    
+-   change the default colors to match your perception of land cover categories (5)    
+-   move the map legend outside of the map to improve readability (5)    
+-   add a scale bar and north arrow and change the position of both to improve the maps aesthetics (5)  
+-   add the park boundaries on top of the land cover map (5)    
+-   add an inset of Zion's location in the context of the state of Utah (5)    
+    -   hint: an object representing Utah can be subset from the **us_states** dataset)  
+
+```{r include=TRUE}
+```
+
+## question 5
+##### 20 points
+
+Create an interactive map of the world (10)    
+-   include a legend (5)  
+-   change the color palette (5)  
+    -   bonus: use **leaflet** insted of **tmap** (2)   
+
+```{r include=TRUE}
+```
+
+## bonus question
+##### 5 points
+Create THE WORST map! AKA a map that breaks all of the rules of legibility/clarity, yet somehow still passes for a map. We'll vote on the best worst map (worst worst map?) in class.
+
+```{r include=TRUE}
+```
