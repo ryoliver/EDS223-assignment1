@@ -1,112 +1,80 @@
 ---
 title: 'EDS 223: assignment 1'
-author: '{student name and collaborators}'
-date: "2022-09-28"
+author: "{update with your name and study partners}"
 output: html_document
+date: "2023-10-03"
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## introduction
-The following exercises are modified from [Chapter 9 of Geocomputation with R by Rovin Lovelace](https://geocompr.robinlovelace.net/adv-map.html). Each question lists the total number of points. The breakdown of points can be found at the end of each instruction in parentheses. A general grading rubric can be found on the [course website](https://ryoliver.github.io/EDS_223_spatial_analysis/assignments.html).
+## Overview
+In this assignment we'll explore making maps in R! To do so, we will be visualizing environmental inequities within the United States.
 
-**Please update "author" to list your first and last names and any collaborators (e.g. Ruth Oliver, Friend1, Friend2)**
+We will be working with data from the United States Environmental Protection Agency's EJScreen: Environmental Justice Screening and Mapping Tool.
 
-**Due by midnight Saturday 2022-10-08**
+According to the [US EPA website](https://www.epa.gov/ejscreen/purposes-and-uses-ejscreen):
 
-## prerequisites
+>This screening tool and data may be of interest to community residents or other stakeholders as they search for environmental or demographic information. It can also support a wide range of research and policy goals. The public has used EJScreen in many different locations and in many different ways.
+>
+>EPA is sharing EJScreen with the public:  
+> - to be more transparent about how we consider environmental justice in our work,  
+> - to assist our stakeholders in making informed decisions about pursuing environmental justice and,   
+> - to create a common starting point between the agency and the public when looking at issues related to environmental justice. 
 
-```{r load, include=TRUE, message=FALSE, warning=FALSE}
+EJScreen provides on environmental and demographic information for the US at the Census [tract](https://en.wikipedia.org/wiki/Census_tract) and [block group](https://en.wikipedia.org/wiki/Census_block_group) levels. You will be working with block group data that has been downloaded from the [EPA site](https://www.epa.gov/ejscreen/download-ejscreen-data). To understand the associated data columns, you will need to explore the Technical Documentation and column description spreadsheet available in the data folder. I also encourage you to explore the [limitations and caveats](https://www.epa.gov/ejscreen/limitations-and-caveats-using-ejscreen) of the data.
+
+
+## Assignment
+Your task is to explore a question or problem of your choosing. You should focus on region(s), communities, or environmental hazards that interest you.  
+
+Please write a short paragraph describing the environmental question you would like to explore through visualization. Create 3 distinct maps of your choice that support this exploration. Because breaking the rules can be a fun way to learn them, please make the ugliest map you can imagine that breaks all the rules!
+  
+Please incorporate the following elements into at least **one map**:
+
+-   categorical color display
+-   continuous color display
+-   custom binned color legend
+-   graticules
+-   scale bar
+-   compass rose
+-   interactive map
+-   inset map
+-   updated color palette
+-   display two datasets in one map
+
+**All maps** should include the following:
+
+-   legend with legible (updated) title
+-   legible colorscale
+-   indication of scale and orientation 
+  
+### Grading
+Assignment 1 is worth 15% of your final grade. Full credit will be given to responses that address all requirements listed above. Partial credit will be given based on the proportion of requirements. The short paragraph is worth 20% of the assignment grade. Maps are worth 80% of the assignment grade.
+
+
+Below I provide example code to help you manipulate the EJScreen data. You should update these to the regions of your choice.
+```{r include=TRUE, eval=FALSE}
+library(tidyverse)
 library(sf)
-library(raster)
-library(dplyr)
-library(spData)
-library(spDataLarge)
-library(tmap)
-```
 
-These exercises rely on a new data object based on the **world** and **worldbank_df** datasets from the **spData* package.
+# read in geodatabase of EJScreen data at the Census Block Group level
+ejscreen <- st_read("~/data/EJSCREEN_2023_BG_StatePct_with_AS_CNMI_GU_VI.gdb/") 
 
-```{r include=TRUE}
-africa = world |> 
-  filter(continent == "Africa", !is.na(iso_a2)) |> 
-  left_join(worldbank_df, by = "iso_a2") |> 
-  dplyr::select(name, subregion, gdpPercap, HDI, pop_growth) |> 
-  st_transform("+proj=aea +lat_1=20 +lat_2=-23 +lat_0=0 +lon_0=25")
-```
+# filter to a state you are interested in
+california <- ejscreen %>%
+  filter(ST_ABBREV == "CA") 
 
-We will also use the **zion** and **nlcd** datasets from the **spDataLarge** package.
+# filter to a county you are interested in
+santa_barbara <- ejscreen %>%
+  filter(CNTY_NAME %in% c("Santa Barbara County"))
 
-```{r include=TRUE}
-zion = st_read((system.file("vector/zion.gpkg", package = "spDataLarge")))
-data(nlcd, package = "spDataLarge")
-force(nlcd)
-```
+# find the average values for all variables within counties
+california_counties <- aggregate(california, by = list(california$CNTY_NAME), FUN = mean)
 
-## question 1
-##### 10 points
+# find the centroid within each Census Block Group
+# this is helpful so you can plot Census Block Group data as points
+california_blockgroup_centroids <- st_centroid(california)
 
-Create a map showing the geographic distribution of the Human Development Index (HDI) across Africa.  
--   use both base graphics (hint: use **plot()**) and **tmap**) (4)   
--   name two advantages of each based on the experience (3) 
--   name three other mapping packages and an advantage of each (3)
-
-
-```{r include=TRUE}
-```
-
-## question 2
-##### 20 points
-
-Extend the **tmap** created for question 1 so the legend has three bins: "high" (HDI above 0.7), "medium" (HDI between 0.55 and 0.7), and "low" (HDI below 0.55). (5)  
--   change the legend title (5)  
--   change the class labels (5)  
--   change the color palette (5)  
-
-```{r include=TRUE}
-```
-
-## question 3
-##### 20 points
-
-Represent Africa's subregions on the map. (5)    
--   change the color palette (5)  
--   change the legend title (5)  
--   combine this map with the map from question 2 into a single plot (5)   
-
-```{r include=TRUE}
-```
-
-## question 4
-##### 30 points
-
-Create a land cover map of Zion National Park (5)    
--   change the default colors to match your perception of land cover categories (5)    
--   move the map legend outside of the map to improve readability (5)    
--   add a scale bar and north arrow and change the position of both to improve the maps aesthetics (5)  
--   add the park boundaries on top of the land cover map (5)    
--   add an inset of Zion's location in the context of the state of Utah (5)    
-    -   hint: an object representing Utah can be subset from the **us_states** dataset)  
-
-```{r include=TRUE}
-```
-
-## question 5
-##### 20 points
-
-Create an interactive map of the world (10)    
--   include a legend (5)  
--   change the color palette (5)  
-    -   bonus: use **leaflet** insted of **tmap** (2)   
-
-```{r include=TRUE}
-```
-
-## bonus question
-##### 5 points
-Create THE WORST map! AKA a map that breaks all of the rules of legibility/clarity, yet somehow still passes for a map. We'll vote on the best worst map (worst worst map?) in class.
-
-```{r include=TRUE}
 ```
